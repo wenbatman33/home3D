@@ -202,7 +202,7 @@ function allowed(x,z){const r=.16;if(!areas.some(([x1,z1,x2,z2])=>x>=x1&&x<=x2&&
 function move(dx,dz){const n=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.07));for(let i=0;i<n;i++){if(allowed(camera.position.x+dx/n,camera.position.z))camera.position.x+=dx/n;if(allowed(camera.position.x,camera.position.z+dz/n))camera.position.z+=dz/n;}}
 let last=performance.now(),fpsCount=0;function animate(t){const dt=Math.min((t-last)/1000,.05);last=t;if(mode==='overview')orbit.update();else if(!document.querySelector('dialog[open]')){let f=Number(keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'))+joy.y;let s=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'))+joy.x;const mag=Math.max(1,Math.hypot(f,s));f/=mag;s/=mag;const speed=(keys.has('ShiftLeft')||keys.has('ShiftRight')?2.8:1.65)*dt;move((-Math.sin(yaw)*f+Math.cos(yaw)*s)*speed,(-Math.cos(yaw)*f-Math.sin(yaw)*s)*speed);}if(physical)physical.render(t);else renderer.render(scene,camera);fpsCount++;}
 renderer.setAnimationLoop(animate);window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);physical?.invalidateScene();if(mode==='overview')overview();if(mode==='walk')$('#joystick').hidden=!matchMedia('(pointer:coarse)').matches;});
-manager.onLoad=()=>{if(assetErrors.length){$('#load-status').textContent='部分材質載入失敗，請重新整理。';$('#loading').addEventListener('click',()=>location.reload());}else {physical=createEfficientRenderer(renderer,scene,camera);applyLighting();applyPalette(activePalette);$('#render-status').textContent='柔和日光 · 靜止時不重繪';$('#loading').classList.add('done');}};
+manager.onLoad=()=>{if(assetErrors.length){$('#load-status').textContent='部分材質載入失敗，請重新整理。';$('#loading').addEventListener('click',()=>location.reload());}else {physical=createEfficientRenderer(renderer,scene,camera,text=>{$("#render-status").textContent=text;$("#quality-button").setAttribute("aria-pressed",String(physical?.state.pathTracing??false));});applyLighting();applyPalette(activePalette);$('#render-status').textContent='柔和日光 · 靜止時不重繪';$('#loading').classList.add('done');}};
 overview();
 // Read-only diagnostics for repeatable browser verification.
 window.home3D={get state(){return {mode,lightmapsReady,palette:activePalette,lighting:physical?.state??null,position:camera.position.toArray(),yaw,pitch,assetErrors,frames:fpsCount,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,rooms:rooms.map(r=>({name:r.name,x:r.x,z:r.z,clear:allowed(r.x,r.z)}))};},allowed};
@@ -221,3 +221,22 @@ function applyPalette(key){const palette=palettes[key]??palettes.sage;activePale
 for(const [key,p] of Object.entries(palettes)){const button=document.createElement('button');button.dataset.palette=key;button.innerHTML=`<span class="swatches">${p.colors.map(color=>`<i style="background:${color}"></i>`).join('')}</span><strong>${p.name}</strong><small>${p.subtitle}</small>`;button.onclick=()=>{applyPalette(key);$('#palette-dialog').close();};$('#palette-options').append(button);}
 $('#palette-button').onclick=()=>$('#palette-dialog').showModal();$('#palette-dialog .close').onclick=()=>$('#palette-dialog').close();
 try{activePalette=localStorage.getItem('home3D-palette')||'sage';}catch{}applyPalette(activePalette);
+
+$('#quality-button').onclick=()=>{
+ if(!physical)return;
+ const enabled=!physical.state.pathTracing;
+ $('#quality-button').setAttribute('aria-pressed',String(enabled));
+ physical.setReal(enabled);
+};
+$('#photo-button').onclick=async()=>{
+ if(!physical)return;
+ const button=$('#photo-button');button.disabled=true;button.textContent='匯出中…';
+ try{
+  const blob=await physical.capture(),url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='home3D-'+$('#location').textContent+'-'+new Date().toISOString().replace(/[:.]/g,'-')+'.png';
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  button.textContent='照片已匯出';
+ }catch(error){button.textContent='匯出失敗，請重試';console.error(error);}
+ finally{button.disabled=false;setTimeout(()=>button.textContent='匯出照片',2000);}
+};

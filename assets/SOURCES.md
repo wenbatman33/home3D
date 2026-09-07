@@ -22,3 +22,6 @@ Sky: Poly Haven, kloofendal_48d_partly_cloudy_puresky, CC0. https://polyhaven.co
 
 ## Experimental lighting
 Offline baking scripts are retained for development. Their generated lightmaps are excluded from Git and are not loaded by the current viewer.
+
+## Optional real lighting
+Vendored three-gpu-pathtracer 0.0.23 and three-mesh-bvh 0.8.3 are loaded only on request. Their MIT licenses are included in vendor/pathtracer/LICENSE and vendor/bvh/LICENSE. Prebuilt ESM files are shipped; no build or npm install is needed.
