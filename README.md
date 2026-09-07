@@ -4,7 +4,7 @@
 
 ## 開啟
 
-執行 `node server.mjs`，開啟 http://localhost:8080 。無需 npm install 或 build。也可整體上傳 index.html、style.css、app.js、lighting.js、vendor/、assets/ 到靜態主機；透過 HTTP 開啟。
+執行 `node server.mjs`，開啟 http://localhost:8080 。無需 npm install 或 build。也可整體上傳 index.html、style.css、app.js、lighting.js、interior-details.js、vendor/、assets/ 到靜態主機；透過 HTTP 開啟。
 
 ## 操作
 
@@ -26,7 +26,7 @@
 
 目前使用天空環境光、日光與快取陰影；已停用有灰斑的實驗光照貼圖。瀏覽器不載入烘焙圖，不執行路徑追蹤或全螢幕 SSAO。畫面靜止時停止重繪，日夜及視角模式切換時更新陰影。
 
-四組配色即時更新材質。夜景搭配少量暖色燈具。此模式優先確保乾淨表面與漫遊效能，並非完整全局光照模擬。
+四組配色連動客廳電視主牆、餐廳側牆、主臥床頭牆、櫃體及軟裝。沙發具獨立坐墊、縫邊、靠墊與離地腳架，櫃體具門縫和內縮踢腳。客廳以單一面光源補光，固定家具底部搭配近似接觸陰影，不額外執行全螢幕渲染。夜景搭配少量暖色燈具。此模式優先確保乾淨表面與漫遊效能，並非完整全局光照模擬。
 
 scripts 中保留實驗性的 Blender 烘焙腳本，尚未採用。產出的 assets/lighting、暫存檔及測試截圖不納入 Git，也不屬於目前瀏覽器渲染流程。
 
